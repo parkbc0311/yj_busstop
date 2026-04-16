@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="버스도착">
+  <meta name="theme-color" content="#F7F3EE">
+  <title>버스 도착 정보</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #F7F3EE;
+      --bg2: #F0EBE4;
+      --card: #FFFFFF;
+      --text-1: #1A1714;
+      --text-2: #8A8278;
+      --text-3: #C4BFBA;
+      --blue: #2B6CB0;
+      --blue-bg: #EBF4FF;
+      --green: #276749;
+      --green-bg: #F0FFF4;
+      --orange: #C05621;
+      --orange-bg: #FFFAF0;
+      --red: #C53030;
+      --red-bg: #FFF5F5;
+      --gray-bg: #F7F7F7;
+      --border: #E8E2DB;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.07);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────── SETUP SCREEN ─────────── */
+    #setup-screen {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: calc(40px + var(--safe-top)) 24px calc(40px + var(--safe-bottom));
+    }
+
+    .setup-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--text-1);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      margin-bottom: 28px;
+      box-shadow: 0 8px 24px rgba(26,23,20,0.18);
+    }
+
+    .setup-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    .setup-subtitle {
+      font-size: 14px;
+      color: var(--text-2);
+      text-align: center;
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 300px;
+    }
+
+    .setup-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .input-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 13px 15px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px;
+      color: var(--text-1);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .text-input:focus {
+      border-color: var(--text-1);
+      box-shadow: 0 0 0 3px rgba(26,23,20,0.08);
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .input-hint a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .primary-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--text-1);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-appearance: none;
+    }
+
+    .primary-btn:active {
+      opacity: 0.85;
+      transform: scale(0.99);
+    }
+
+    .setup-steps {
+      margin-top: 28px;
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .steps-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      background: var(--bg2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-2);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    .step-text a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ─────────── MAIN APP ─────────── */
+    #main-app {
+      max-width: 500px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding-bottom: calc(20px + var(--safe-bottom));
+    }
+
+    /* Header */
+    .header {
+      padding: calc(18px + var(--safe-top)) 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {}
+
+    .app-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .app-title span {
+      font-size: 20px;
+    }
+
+    .last-updated {
+      font-size: 11.5px;
+      color: var(--text-3);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--card);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      font-size: 17px;
+      transition: transform 0.1s, box-shadow 0.15s;
+      color: var(--text-1);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.9);
+    }
+
+    .icon-btn.spinning {
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status bar */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px 0;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .status-dot.ok { background: var(--green); animation: pulse-dot 2.5s ease-in-out infinite; }
+    .status-dot.error { background: var(--red); animation: none; }
+    .status-dot.loading { background: var(--orange); animation: pulse-dot 1s ease-in-out infinite; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .status-label {
+      font-size: 11.5px;
+      color: var(--text-3);
+      font-weight: 400;
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      padding: 16px 20px 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--bg2);
+      border-radius: 14px;
+      padding: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 11px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      letter-spacing: -0.2px;
+    }
+
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--text-1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .tab-btn.inactive {
+      background: transparent;
+      color: var(--text-2);
+    }
+
+    /* Station chip */
+    .station-chip-wrap {
+      padding: 12px 20px 0;
+    }
+
+    .station-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card);
+      border-radius: 30px;
+      padding: 7px 14px;
+      box-shadow: var(--shadow-sm);
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .station-pin {
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .station-name-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .station-id-text {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 400;
+      flex-shrink: 0;
+    }
+
+    /* Bus List */
+    .bus-list {
+      padding: 14px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Bus Card */
+    .bus-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp 0.28s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .bus-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .bus-number {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-1);
+    }
+
+    .bus-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 30px;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-running { background: var(--green-bg); color: var(--green); }
+    .badge-stopped { background: var(--gray-bg); color: var(--text-3); }
+    .badge-lowfloor { background: var(--blue-bg); color: var(--blue); }
+
+    .arrival-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .arrival-cell {
+      border-radius: 12px;
+      padding: 11px 12px;
+    }
+
+    .arrival-cell-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 5px;
+      opacity: 0.55;
+    }
+
+    .arrival-cell-time {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      line-height: 1.1;
+    }
+
+    .arrival-cell-loc {
+      font-size: 11px;
+      margin-top: 3px;
+      opacity: 0.65;
+      font-weight: 400;
+    }
+
+    /* Urgency themes */
+    .urg-imminent { background: var(--red-bg); color: var(--red); }
+    .urg-soon     { background: var(--orange-bg); color: var(--orange); }
+    .urg-normal   { background: var(--blue-bg); color: var(--blue); }
+    .urg-far      { background: var(--bg); color: var(--text-2); }
+    .urg-none     { background: var(--gray-bg); color: var(--text-3); }
+
+    /* Low floor icon */
+    .lowfloor-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--blue);
+      background: var(--blue-bg);
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-top: 6px;
+    }
+
+    /* Loading state */
+    .loading-state {
+      padding: 60px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      color: var(--text-2);
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--text-2);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    .loading-label {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--text-2);
+    }
+
+    /* Empty */
+    .empty-state {
+      padding: 56px 20px;
+      text-align: center;
+      color: var(--text-2);
+    }
+
+    .empty-emoji {
+      font-size: 44px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .empty-msg {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Error */
+    .error-state {
+      background: #FFF8F8;
+      border-radius: var(--radius);
+      padding: 22px;
+      text-align: center;
+      border: 1px solid #FFE4E4;
+    }
+
+    .error-emoji { font-size: 30px; margin-bottom: 10px; }
+
+    .error-msg {
+      font-size: 13px;
+      color: var(--red);
+      line-height: 1.6;
+    }
+
+    .error-hint {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .retry-btn {
+      margin-top: 14px;
+      padding: 9px 20px;
+      background: var(--text-1);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Settings row */
+    .footer {
+      padding: 20px 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .footer-btn {
+      font-size: 12px;
+      color: var(--text-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 400;
+      transition: color 0.15s;
+    }
+
+    .footer-btn:active {
+      color: var(--text-2);
+    }
+
+    /* Section divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 20px;
+    }
+
+    /* Util */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════ -->
+<div id="setup-screen" class="hidden">
+  <div class="setup-icon">🚌</div>
+  <h1 class="setup-title">버스 도착 정보</h1>
+  <p class="setup-subtitle">경기도 버스 공공 API를 사용해요.<br>아래 안내를 따라 인증키를 발급받아 입력해 주세요.</p>
+
+  <div class="setup-card">
+    <label class="input-label" for="api-key-input">API 인증키 (디코딩)</label>
+    <input
+      type="text"
+      id="api-key-input"
+      class="text-input"
+      placeholder="서비스 키를 여기에 붙여넣으세요"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    >
+    <p class="input-hint">
+      <a href="https://www.data.go.kr" target="_blank">data.go.kr</a> → 로그인 →
+      "경기도 버스도착정보 조회 서비스" 검색 →
+      활용신청 → 마이페이지에서 <strong>일반 인증키(디코딩)</strong> 복사
+    </p>
+    <button class="primary-btn" onclick="saveApiKey()">시작하기 →</button>
+  </div>
+
+  <div class="setup-steps">
+    <div class="steps-title">API 키 발급 방법</div>
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-text"><a href="https://www.data.go.kr" target="_blank">data.go.kr</a>에 회원가입 후 로그인</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-text">검색창에 <strong>"경기도 버스도착정보 조회"</strong> 검색</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-text">오픈 API 선택 → <strong>활용신청</strong> (즉시 승인)</div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-text">마이페이지 → API 목록 → <strong>일반 인증키(디코딩)</strong> 복사 후 위에 붙여넣기</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════ -->
+<div id="main-app" class="hidden">
+  <div class="header">
+    <div class="header-left">
+      <div class="app-title"><span>🚌</span> 버스 도착</div>
+      <div class="last-updated" id="last-updated">–</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="refresh-btn" onclick="refreshData()" title="새로고침">↻</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot loading" id="status-dot"></div>
+    <div class="status-label" id="status-label">연결 중...</div>
+  </div>
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-morning" onclick="switchTab('morning')">☀️ 출근 버스</button>
+      <button class="tab-btn inactive" id="tab-evening" onclick="switchTab('evening')">🌙 퇴근 버스</button>
+    </div>
+  </div>
+
+  <div class="station-chip-wrap">
+    <div class="station-chip">
+      <span class="station-pin">📍</span>
+      <span class="station-name-text" id="chip-name">–</span>
+      <span class="station-id-text" id="chip-id"></span>
+    </div>
+  </div>
+
+  <div class="bus-list" id="bus-list">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-label">버스 정보 불러오는 중...</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="footer-btn" onclick="resetApiKey()">⚙︎ API 키 재설정</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCRIPT
+═══════════════════════════════════════ -->
+<script>
+// ── CONFIG ──────────────────────────────
+const STATIONS = {
+  morning: {
+    displayName: '광교더리브.힐스테이트레이크',
+    arsId: '04378',
+    keyword: '광교더리브',
+    cacheKey: 'sid_morning',
+    stationId: null
+  },
+  evening: {
+    displayName: '광교중앙.경기도청.아주대역환승센터',
+    arsId: '04397',
+    keyword: '광교중앙',
+    cacheKey: 'sid_evening',
+    stationId: null
+  }
+};
+
+const CORS  = 'https://corsproxy.io/?';
+const SAPI  = 'https://apis.data.go.kr/6410000/busstationservice';
+const AAPI  = 'https://apis.data.go.kr/6410000/busarrivalservice';
+const REFRESH_MS = 30000;
+
+let currentTab   = 'morning';
+let refreshTimer = null;
+let apiKey       = '';
+
+// ── INIT ────────────────────────────────
+function init() {
+  apiKey = localStorage.getItem('gbus_api_key') || '';
+  if (!apiKey) {
+    show('setup');
+  } else {
+    show('main');
+    switchTab('morning');
+  }
+}
+
+function show(screen) {
+  document.getElementById('setup-screen').classList.toggle('hidden', screen !== 'setup');
+  document.getElementById('main-app').classList.toggle('hidden', screen !== 'main');
+}
+
+// ── API KEY ──────────────────────────────
+function saveApiKey() {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v) { alert('인증키를 입력해 주세요.'); return; }
+  localStorage.setItem('gbus_api_key', v);
+  apiKey = v;
+  show('main');
+  switchTab('morning');
+}
+
+function resetApiKey() {
+  if (!confirm('API 키를 초기화하고 다시 설정하시겠어요?')) return;
+  localStorage.removeItem('gbus_api_key');
+  localStorage.removeItem(STATIONS.morning.cacheKey);
+  localStorage.removeItem(STATIONS.evening.cacheKey);
+  clearInterval(refreshTimer);
+  apiKey = '';
+  show('setup');
+}
+
+// ── TAB ──────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-morning').className = `tab-btn ${tab === 'morning' ? 'active' : 'inactive'}`;
+  document.getElementById('tab-evening').className = `tab-btn ${tab === 'evening' ? 'active' : 'inactive'}`;
+  updateChip();
+  loadData();
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadData, REFRESH_MS);
+}
+
+function updateChip() {
+  const s = STATIONS[currentTab];
+  document.getElementById('chip-name').textContent = s.displayName;
+  document.getElementById('chip-id').textContent   = `#${s.arsId}`;
+}
+
+// ── FETCH ────────────────────────────────
+async function proxied(url) {
+  const r = await fetch(CORS + encodeURIComponent(url));
+  if (!r.ok) throw new Error(`네트워크 오류 (${r.status})`);
+  return r.text();
+}
+
+async function getStationId(tab) {
+  const s = STATIONS[tab];
+  if (s.stationId) return s.stationId;
+
+  const cached = localStorage.getItem(s.cacheKey);
+  if (cached) { s.stationId = cached; return cached; }
+
+  const url  = `${SAPI}/getBusStationList?serviceKey=${encodeURIComponent(apiKey)}&keyword=${encodeURIComponent(s.keyword)}&_type=json`;
+  const text = await proxied(url);
+  const data = JSON.parse(text);
+
+  const rc   = data?.response?.msgHeader?.resultCode ?? data?.response?.header?.resultCode;
+  const raw  = data?.response?.msgBody?.busStationList;
+  if (!raw) throw new Error('정류장 정보를 찾을 수 없어요. 키워드나 API 키를 확인해 주세요.');
+
+  const list = Array.isArray(raw) ? raw : [raw];
+  const match = list.find(x => String(x.stationNo) === String(s.arsId)) || list[0];
+  if (!match) throw new Error('정류장 ID 매칭 실패');
+
+  s.stationId = String(match.stationId);
+  localStorage.setItem(s.cacheKey, s.stationId);
+  return s.stationId;
+}
+
+async function fetchArrivals(stationId) {
+  const url  = `${AAPI}/getBusArrivalList?serviceKey=${encodeURIComponent(apiKey)}&stationId=${stationId}&_type=json`;
+  const text = await proxied(url);
+  const data = JSON.parse(text);
+
+  const raw = data?.response?.msgBody?.busArrivalList;
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
+// ── LOAD DATA ────────────────────────────
+async function loadData() {
+  setStatus('loading', '업데이트 중...');
+  renderLoading();
+
+  try {
+    const sid  = await getStationId(currentTab);
+    const list = await fetchArrivals(sid);
+    renderBuses(list);
+    setStatus('ok', `실시간 · ${REFRESH_MS/1000}초마다 자동갱신`);
+    setTime();
+  } catch (e) {
+    console.error(e);
+    renderError(e.message);
+    setStatus('error', '연결 오류');
+  }
+}
+
+function refreshData() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  loadData().finally(() => setTimeout(() => btn.classList.remove('spinning'), 600));
+}
+
+// ── RENDER ───────────────────────────────
+function renderLoading() {
+  document.getElementById('bus-list').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-label">버스 정보 불러오는 중...</div>
+    </div>`;
+}
+
+function renderError(msg) {
+  document.getElementById('bus-list').innerHTML = `
+    <div class="error-state">
+      <div class="error-emoji">⚠️</div>
+      <div class="error-msg">${escHtml(msg)}</div>
+      <div class="error-hint">API 키가 올바른지 확인하거나, 잠시 후 다시 시도해 주세요.<br>처음 신청 후 1~2시간 뒤 활성화됩니다.</div>
+      <button class="retry-btn" onclick="loadData()">다시 시도</button>
+    </div>`;
+}
+
+function renderBuses(list) {
+  if (!list || list.length === 0) {
+    document.getElementById('bus-list').innerHTML = `
+      <div class="empty-state">
+        <span class="empty-emoji">🌙</span>
+        <div class="empty-msg">현재 도착 예정인 버스 정보가 없어요.<br><small style="color:var(--text-3)">운행 종료 시간이거나 정보가 없는 경우일 수 있어요.</small></div>
+      </div>`;
+    return;
+  }
+
+  // Sort: running first, then by first arrival time
+  const sorted = [...list].sort((a, b) => {
+    const aStop = a.flag === 'STOP';
+    const bStop = b.flag === 'STOP';
+    if (aStop !== bStop) return aStop ? 1 : -1;
+    return (parseInt(a.predictTime1) || 999) - (parseInt(b.predictTime1) || 999);
+  });
+
+  let html = '';
+  sorted.forEach((bus, i) => {
+    const running = bus.flag !== 'STOP';
+    const t1 = running ? parseMin(bus.predictTime1) : null;
+    const t2 = running ? parseMin(bus.predictTime2) : null;
+    const l1 = bus.locationNo1 ? parseInt(bus.locationNo1) : null;
+    const l2 = bus.locationNo2 ? parseInt(bus.locationNo2) : null;
+    const low1 = bus.lowPlate1 === '1';
+    const low2 = bus.lowPlate2 === '1';
+
+    html += `
+    <div class="bus-card" style="animation-delay:${i * 0.04}s">
+      <div class="bus-card-header">
+        <div class="bus-number">${escHtml(bus.routeName || '?')}</div>
+        <div class="bus-badge ${running ? 'badge-running' : 'badge-stopped'}">${running ? '운행중' : '운행종료'}</div>
+      </div>
+      <div class="arrival-grid">
+        ${renderCell('1번째 버스', t1, l1, low1, running, bus.flag)}
+        ${renderCell('2번째 버스', t2, l2, low2, running, bus.flag)}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('bus-list').innerHTML = html;
+}
+
+function renderCell(label, minutes, loc, isLowFloor, running, flag) {
+  const urg = running ? urgClass(minutes) : 'urg-none';
+  const timeStr = running ? fmtTime(minutes, flag) : '–';
+  const locStr  = (running && loc && loc > 0) ? `${loc}번째 전` : '';
+  const lowTag  = (running && isLowFloor && minutes !== null) ? `<div class="lowfloor-tag">♿ 저상</div>` : '';
+
+  return `
+    <div class="arrival-cell ${urg}">
+      <div class="arrival-cell-label">${label}</div>
+      <div class="arrival-cell-time">${timeStr}</div>
+      ${locStr ? `<div class="arrival-cell-loc">${locStr}</div>` : ''}
+      ${lowTag}
+    </div>`;
+}
+
+function urgClass(m) {
+  if (m === null || m === undefined) return 'urg-none';
+  if (m <= 1)  return 'urg-imminent';
+  if (m <= 5)  return 'urg-soon';
+  if (m <= 20) return 'urg-normal';
+  return 'urg-far';
+}
+
+function fmtTime(m, flag) {
+  if (flag === 'PASS')  return '통과';
+  if (flag === 'WAIT')  return '대기';
+  if (m === null || m === undefined) return '–';
+  if (m === 0) return '곧 도착 🚌';
+  return `${m}분 후`;
+}
+
+function parseMin(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  const n = parseInt(v);
+  return isNaN(n) ? null : n;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── STATUS ───────────────────────────────
+function setStatus(state, msg) {
+  const dot = document.getElementById('status-dot');
+  dot.className = `status-dot ${state}`;
+  document.getElementById('status-label').textContent = msg;
+}
+
+function setTime() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('last-updated').textContent = `${hh}:${mm}:${ss} 업데이트`;
+}
+
+// ── GO ───────────────────────────────────
+init();
+</script>
+</body>
+</html>
