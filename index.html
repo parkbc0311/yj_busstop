@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="버스도착">
+  <meta name="theme-color" content="#F7F3EE">
+  <title>버스 도착 정보</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #F7F3EE; --bg2: #F0EBE4; --card: #FFFFFF;
+      --text-1: #1A1714; --text-2: #8A8278; --text-3: #C4BFBA;
+      --blue: #2B6CB0; --blue-bg: #EBF4FF;
+      --green: #276749; --green-bg: #F0FFF4;
+      --orange: #C05621; --orange-bg: #FFFAF0;
+      --red: #C53030; --red-bg: #FFF5F5;
+      --gray-bg: #F7F7F7; --border: #E8E2DB;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05);
+      --shadow-md: 0 2px 8px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.07);
+      --radius: 18px; --radius-sm: 12px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    html { background: var(--bg); }
+    body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: var(--bg); color: var(--text-1); min-height: 100dvh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+    /* ── MAIN APP ── */
+    #main-app { max-width: 500px; margin: 0 auto; min-height: 100dvh; padding-bottom: calc(20px + var(--safe-bottom)); }
+
+    .header { padding: calc(18px + var(--safe-top)) 20px 0; display: flex; align-items: center; justify-content: space-between; }
+    .app-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+    .app-title span { font-size: 20px; }
+    .last-updated { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--card); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); font-size: 17px; transition: transform 0.1s; color: var(--text-1); }
+    .icon-btn:active { transform: scale(0.9); }
+    .icon-btn.spinning { animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-bar { display: flex; align-items: center; gap: 6px; padding: 12px 20px 0; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; transition: background 0.3s; }
+    .status-dot.ok { background: var(--green); animation: pulse-dot 2.5s ease-in-out infinite; }
+    .status-dot.error { background: var(--red); animation: none; }
+    .status-dot.loading { background: var(--orange); animation: pulse-dot 1s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .status-label { font-size: 11.5px; color: var(--text-3); }
+
+    .tabs-wrapper { padding: 16px 20px 0; }
+    .tabs { display: flex; gap: 6px; background: var(--bg2); border-radius: 14px; padding: 4px; }
+    .tab-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 11px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.22s ease; letter-spacing: -0.2px; }
+    .tab-btn.active { background: var(--card); color: var(--text-1); box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.06); }
+    .tab-btn.inactive { background: transparent; color: var(--text-2); }
+
+    .station-chip-wrap { padding: 12px 20px 0; }
+    .station-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border-radius: 30px; padding: 7px 14px; box-shadow: var(--shadow-sm); max-width: 100%; overflow: hidden; }
+    .station-pin { font-size: 13px; flex-shrink: 0; }
+    .station-name-text { font-size: 12.5px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .station-id-text { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+
+    .bus-list { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+
+    .bus-card { background: var(--card); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow-sm); animation: fadeUp 0.28s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .bus-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .bus-number { font-size: 21px; font-weight: 700; letter-spacing: -0.5px; }
+    .bus-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 30px; }
+    .badge-running { background: var(--green-bg); color: var(--green); }
+    .badge-stopped { background: var(--gray-bg); color: var(--text-3); }
+
+    .arrival-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .arrival-cell { border-radius: 12px; padding: 11px 12px; }
+    .arrival-cell-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; opacity: 0.55; }
+    .arrival-cell-time { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.1; }
+    .arrival-cell-loc { font-size: 11px; margin-top: 3px; opacity: 0.65; }
+    .lowfloor-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; color: var(--blue); background: var(--blue-bg); border-radius: 4px; padding: 2px 6px; margin-top: 6px; }
+
+    .urg-imminent { background: var(--red-bg); color: var(--red); }
+    .urg-soon     { background: var(--orange-bg); color: var(--orange); }
+    .urg-normal   { background: var(--blue-bg); color: var(--blue); }
+    .urg-far      { background: var(--bg); color: var(--text-2); }
+    .urg-none     { background: var(--gray-bg); color: var(--text-3); }
+
+    .loading-state { padding: 60px 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .spinner { width: 30px; height: 30px; border: 2.5px solid var(--border); border-top-color: var(--text-2); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    .loading-label { font-size: 13.5px; color: var(--text-2); }
+
+    .empty-state { padding: 56px 20px; text-align: center; }
+    .empty-emoji { font-size: 44px; display: block; margin-bottom: 12px; }
+    .empty-msg { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+    .error-state { background: #FFF8F8; border-radius: var(--radius); padding: 22px; text-align: center; border: 1px solid #FFE4E4; }
+    .error-emoji { font-size: 30px; margin-bottom: 10px; }
+    .error-msg { font-size: 13px; color: var(--red); line-height: 1.6; }
+    .error-hint { font-size: 12px; color: var(--text-2); margin-top: 8px; line-height: 1.5; }
+    .retry-btn { margin-top: 14px; padding: 9px 20px; background: var(--text-1); color: white; border: none; border-radius: 10px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    .footer { padding: 20px 20px 0; display: flex; justify-content: center; }
+    .footer-note { font-size: 12px; color: var(--text-3); text-align: center; line-height: 1.6; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div id="main-app">
+  <div class="header">
+    <div class="header-left">
+      <div class="app-title"><span>🚌</span> 버스 도착</div>
+      <div class="last-updated" id="last-updated">–</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="refresh-btn" onclick="refreshData()" title="새로고침">↻</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot loading" id="status-dot"></div>
+    <div class="status-label" id="status-label">연결 중...</div>
+  </div>
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-morning" onclick="switchTab('morning')">☀️ 출근 버스</button>
+      <button class="tab-btn inactive" id="tab-evening" onclick="switchTab('evening')">🌙 퇴근 버스</button>
+    </div>
+  </div>
+
+  <div class="station-chip-wrap">
+    <div class="station-chip">
+      <span class="station-pin">📍</span>
+      <span class="station-name-text" id="chip-name">–</span>
+      <span class="station-id-text" id="chip-id"></span>
+    </div>
+  </div>
+
+  <div class="bus-list" id="bus-list">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-label">버스 정보 불러오는 중...</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-note">30초마다 자동 갱신 · 경기도 버스정보 시스템</div>
+  </div>
+</div>
+
+<script>
+const STATIONS = {
+  morning: { displayName: '광교더리브.힐스테이트레이크', arsId: '04378', keyword: '광교더리브', stationId: null, cacheKey: 'sid_morning' },
+  evening: { displayName: '광교중앙.경기도청.아주대역환승센터', arsId: '04397', keyword: '광교중앙', stationId: null, cacheKey: 'sid_evening' }
+};
+
+const REFRESH_MS = 30000;
+let currentTab = 'morning';
+let refreshTimer = null;
+
+// ── API (calls our own /api/bus) ──────────
+async function apiFetch(params) {
+  const qs = new URLSearchParams(params).toString();
+  const r = await fetch(`/api/bus?${qs}`);
+  if (!r.ok) throw new Error(`서버 오류 (${r.status})`);
+  return r.json();
+}
+
+async function getStationId(tab) {
+  const s = STATIONS[tab];
+  if (s.stationId) return s.stationId;
+  const cached = sessionStorage.getItem(s.cacheKey);
+  if (cached) { s.stationId = cached; return cached; }
+
+  const data = await apiFetch({ type: 'station', keyword: s.keyword });
+  const raw  = data?.response?.msgBody?.busStationList;
+  if (!raw) throw new Error('정류장 정보를 찾을 수 없어요. Vercel 환경변수(BUS_API_KEY)를 확인해 주세요.');
+
+  const list  = Array.isArray(raw) ? raw : [raw];
+  const match = list.find(x => String(x.stationNo) === String(s.arsId)) || list[0];
+  if (!match) throw new Error('정류장 매칭 실패');
+
+  s.stationId = String(match.stationId);
+  sessionStorage.setItem(s.cacheKey, s.stationId);
+  return s.stationId;
+}
+
+async function fetchArrivals(stationId) {
+  const data = await apiFetch({ type: 'arrival', stationId });
+  const raw  = data?.response?.msgBody?.busArrivalList;
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+}
+
+// ── LOAD ─────────────────────────────────
+async function loadData() {
+  setStatus('loading', '업데이트 중...');
+  renderLoading();
+  try {
+    const sid  = await getStationId(currentTab);
+    const list = await fetchArrivals(sid);
+    renderBuses(list);
+    setStatus('ok', `실시간 · ${REFRESH_MS / 1000}초마다 자동갱신`);
+    setTime();
+  } catch (e) {
+    renderError(e.message);
+    setStatus('error', '연결 오류');
+  }
+}
+
+function refreshData() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  loadData().finally(() => setTimeout(() => btn.classList.remove('spinning'), 600));
+}
+
+// ── TAB ──────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-morning').className = `tab-btn ${tab === 'morning' ? 'active' : 'inactive'}`;
+  document.getElementById('tab-evening').className = `tab-btn ${tab === 'evening' ? 'active' : 'inactive'}`;
+  const s = STATIONS[tab];
+  document.getElementById('chip-name').textContent = s.displayName;
+  document.getElementById('chip-id').textContent   = `#${s.arsId}`;
+  clearInterval(refreshTimer);
+  loadData();
+  refreshTimer = setInterval(loadData, REFRESH_MS);
+}
+
+// ── RENDER ───────────────────────────────
+function renderLoading() {
+  document.getElementById('bus-list').innerHTML = `<div class="loading-state"><div class="spinner"></div><div class="loading-label">버스 정보 불러오는 중...</div></div>`;
+}
+
+function renderError(msg) {
+  document.getElementById('bus-list').innerHTML = `
+    <div class="error-state">
+      <div class="error-emoji">⚠️</div>
+      <div class="error-msg">${esc(msg)}</div>
+      <div class="error-hint">Vercel 대시보드 → Settings → Environment Variables 에서<br><strong>BUS_API_KEY</strong> 가 설정되어 있는지 확인해 주세요.</div>
+      <button class="retry-btn" onclick="loadData()">다시 시도</button>
+    </div>`;
+}
+
+function renderBuses(list) {
+  if (!list || list.length === 0) {
+    document.getElementById('bus-list').innerHTML = `<div class="empty-state"><span class="empty-emoji">🌙</span><div class="empty-msg">현재 도착 예정인 버스 정보가 없어요.</div></div>`;
+    return;
+  }
+
+  const sorted = [...list].sort((a, b) => {
+    const aStop = a.flag === 'STOP', bStop = b.flag === 'STOP';
+    if (aStop !== bStop) return aStop ? 1 : -1;
+    return (parseInt(a.predictTime1) || 999) - (parseInt(b.predictTime1) || 999);
+  });
+
+  let html = '';
+  sorted.forEach((bus, i) => {
+    const running = bus.flag !== 'STOP';
+    const t1 = running ? parseMin(bus.predictTime1) : null;
+    const t2 = running ? parseMin(bus.predictTime2) : null;
+    const l1 = bus.locationNo1 ? parseInt(bus.locationNo1) : null;
+    const l2 = bus.locationNo2 ? parseInt(bus.locationNo2) : null;
+    html += `
+    <div class="bus-card" style="animation-delay:${i * 0.04}s">
+      <div class="bus-card-header">
+        <div class="bus-number">${esc(bus.routeName || '?')}</div>
+        <div class="bus-badge ${running ? 'badge-running' : 'badge-stopped'}">${running ? '운행중' : '운행종료'}</div>
+      </div>
+      <div class="arrival-grid">
+        ${cell('1번째 버스', t1, l1, bus.lowPlate1 === '1', running, bus.flag)}
+        ${cell('2번째 버스', t2, l2, bus.lowPlate2 === '1', running, bus.flag)}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('bus-list').innerHTML = html;
+}
+
+function cell(label, m, loc, isLow, running, flag) {
+  const urg     = running ? urgClass(m) : 'urg-none';
+  const timeStr = running ? fmtTime(m, flag) : '–';
+  const locStr  = (running && loc && loc > 0) ? `<div class="arrival-cell-loc">${loc}번째 전</div>` : '';
+  const lowTag  = (running && isLow && m !== null) ? `<div class="lowfloor-tag">♿ 저상</div>` : '';
+  return `<div class="arrival-cell ${urg}">
+    <div class="arrival-cell-label">${label}</div>
+    <div class="arrival-cell-time">${timeStr}</div>
+    ${locStr}${lowTag}
+  </div>`;
+}
+
+function urgClass(m) {
+  if (m === null) return 'urg-none';
+  if (m <= 1) return 'urg-imminent';
+  if (m <= 5) return 'urg-soon';
+  if (m <= 20) return 'urg-normal';
+  return 'urg-far';
+}
+
+function fmtTime(m, flag) {
+  if (flag === 'PASS') return '통과';
+  if (flag === 'WAIT') return '대기';
+  if (m === null) return '–';
+  if (m === 0) return '곧 도착 🚌';
+  return `${m}분 후`;
+}
+
+function parseMin(v) { const n = parseInt(v); return isNaN(n) ? null : n; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function setStatus(state, msg) {
+  document.getElementById('status-dot').className = `status-dot ${state}`;
+  document.getElementById('status-label').textContent = msg;
+}
+
+function setTime() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('last-updated').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} 업데이트`;
+}
+
+// GO
+switchTab('morning');
+</script>
+</body>
+</html>
