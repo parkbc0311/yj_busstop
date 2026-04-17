@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
   }
 
-  const testUrl = `https://apis.data.go.kr/6410000/busstationservice/getBusStationList?serviceKey=${apiKey}&keyword=%EA%B4%91%EA%B5%90&_type=json`;
+  const testUrl = `https://apis.data.go.kr/6410000/busstationservice/v2/getBusStationList?serviceKey=${apiKey}&keyword=%EA%B4%91%EA%B5%90&_type=json`;
   result.testUrl = testUrl.replace(apiKey, '[KEY_HIDDEN]');
 
   try {
