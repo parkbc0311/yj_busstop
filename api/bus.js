@@ -12,9 +12,9 @@ export default async function handler(req, res) {
   let url = '';
 
   if (type === 'station') {
-    url = `https://apis.data.go.kr/6410000/busstationservice/v2/getBusStationList?serviceKey=${apiKey}&keyword=${encodeURIComponent(keyword)}&_type=json`;
+    url = `https://apis.data.go.kr/6410000/busstationservice/v2/getBusStationListv2?serviceKey=${apiKey}&keyword=${encodeURIComponent(keyword)}&_type=json`;
   } else if (type === 'arrival') {
-    url = `https://apis.data.go.kr/6410000/busarrivalservice/v2/getBusArrivalList?serviceKey=${apiKey}&stationId=${stationId}&_type=json`;
+    url = `https://apis.data.go.kr/6410000/busarrivalservice/v2/getBusArrivalListv2?serviceKey=${apiKey}&stationId=${stationId}&_type=json`;
   } else {
     return res.status(400).json({ error: 'type 파라미터가 필요해요 (station | arrival)' });
   }
