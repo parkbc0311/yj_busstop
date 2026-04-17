@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   let url = '';
 
   if (type === 'station') {
-    url = `https://apis.data.go.kr/6410000/busstationservice/getBusStationList?serviceKey=${apiKey}&keyword=${encodeURIComponent(keyword)}&_type=json`;
+    url = `https://apis.data.go.kr/6410000/busstationservice/v2/getBusStationList?serviceKey=${apiKey}&keyword=${encodeURIComponent(keyword)}&_type=json`;
   } else if (type === 'arrival') {
     url = `https://apis.data.go.kr/6410000/busarrivalservice/v2/getBusArrivalList?serviceKey=${apiKey}&stationId=${stationId}&_type=json`;
   } else {
