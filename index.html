@@ -250,22 +250,33 @@ function renderAll(results) {
       return;
     }
 
+    var PINNED = ['11', '19'];
+    function isPinned(name) { return PINNED.indexOf(String(name).trim()) !== -1; }
+
     var sorted = list.slice().sort(function(a, b) {
+      // 1) 즐겨찾기(11·19번) 우선
+      var pa = isPinned(a.routeName) ? 0 : 1;
+      var pb = isPinned(b.routeName) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      // 2) 운행중 우선
       var as = a.flag === 'STOP', bs = b.flag === 'STOP';
       if (as !== bs) return as ? 1 : -1;
+      // 3) 도착 빠른 순
       return (parseInt(a.predictTime1) || 999) - (parseInt(b.predictTime1) || 999);
     });
 
     html += '<div class="bus-list">';
     sorted.forEach(function(bus, i) {
       var running = bus.flag !== 'STOP';
+      var pinned  = isPinned(bus.routeName);
       var t1 = running ? parseMin(bus.predictTime1) : null;
       var t2 = running ? parseMin(bus.predictTime2) : null;
       var l1 = bus.locationNo1 ? parseInt(bus.locationNo1) : null;
       var l2 = bus.locationNo2 ? parseInt(bus.locationNo2) : null;
-      html += '<div class="bus-card" style="animation-delay:' + ((idx * 10 + i) * 0.04) + 's">' +
+      var cardBorder = pinned ? 'border:1.5px solid #F2C4D8;' : '';
+      html += '<div class="bus-card" style="animation-delay:' + ((idx * 10 + i) * 0.04) + 's;' + cardBorder + '">' +
         '<div class="bus-card-header">' +
-          '<div class="bus-number">' + esc(bus.routeName || '?') + '</div>' +
+          '<div class="bus-number">' + esc(bus.routeName || '?') + (pinned ? ' <span style="font-size:13px">⭐</span>' : '') + '</div>' +
           '<div class="bus-badge ' + (running ? 'badge-running' : 'badge-stopped') + '">' + (running ? '운행중' : '운행종료') + '</div>' +
         '</div>' +
         '<div class="arrival-grid">' +
